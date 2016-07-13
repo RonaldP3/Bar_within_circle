@@ -47,6 +47,10 @@ asp.ratio <- c(4,3)
 ### Set movement type ("move" or "stationary")
 move.type <- "move"
 
+### Apply looming? TRUE or FALSE. ###
+# Note: looming stimuli are set to "stationary" by default
+do.looming <- FALSE
+
 # Number of frames in sequence
 frames <- rate * duration
 # width and height in inches of output files
@@ -71,19 +75,10 @@ light.guide$diameter.degrees <-
        2* 360 * atan(0.5*(diameter/distance)) / (2*pi))
 
 #------------------------------------------------------------------------------
-# Stimulus (polygon) shape and position settings
+# Stimulus (polygon) shape and behaviour
 
 ### Set stimulus height in degrees ###
 stim.height <- 20
-
-### Set rotation of the stimulus in degrees
-rotation <- 270
-# In radians
-rotation[2] <- (rotation /360) * 2 * pi
-
-# Create stimulus square. This can be adjusted below to any desired rectangle
-rectangle <- data.frame(x=c(-1,1,1,-1),
-                        y=c(1,1,-1,-1))
 
 # Set dimensions of stimulus rectangle relative to screen. Note that the 
 # shortest side corresponds to the radius of the light guide.
@@ -91,6 +86,33 @@ rectangle <- data.frame(x=c(-1,1,1,-1),
 rect.width <- 1    
 # Height relative to light guide diameter
 rect.height <- stim.height / light.guide$diameter.degrees
+
+### Set rotation of the coordinate system in degrees from 0 to 360. 
+# Default is a horizontal bar starting at the bottom moving up.
+coord.rot <- 0
+# In radians
+coord.rot[2] <- (coord.rot /360) * 2 * pi
+
+### Set looming. Sizes are relative and cannot be larger than 1.
+looming <- data.frame(start = 0.1,
+                      end = 1)
+
+# Check for wrong entries
+if (max(looming) > 1 | min(looming) < 0) {
+  stop("Looming values must be between 0 and 1!")
+}
+
+# Generate sequence with relative size values based on looming settings
+looming.size <- seq(from = looming$start[1],
+                    to = looming$end[1],
+                    by = ((looming$end[1]-looming$start[1])/frames))
+
+#------------------------------------------------------------------------------
+# Create stimulus polygon.
+
+# Create stimulus square. This can be adjusted below to any desired rectangle
+rectangle <- data.frame(x=c(-1,1,1,-1),
+                        y=c(1,1,-1,-1))
 
 # The movement of the stimulus should be contained within the circle describing
 # the diameter of the light guide. The relative width of a square bounded by a
@@ -157,11 +179,11 @@ for (a in 1:frames) {
   
   # Move or keep stationary, depending on settings above
   if (move.type == "move") {
-  # Move
-  new.pos$y <- new.pos$y + y[a]
+    # Move
+    new.pos$y <- new.pos$y + y[a]
   } else if (move.type == "stationary") {
-  # Stationary bar at lowest position
-  new.pos$y <- new.pos$y + y[1]
+    # Stationary bar at lowest position
+    new.pos$y <- new.pos$y + y[1]
   } else {
     stop("Select valid movement type")
   }
@@ -169,9 +191,18 @@ for (a in 1:frames) {
   # Initiate rotated coordinate list
   rotated <- new.pos
   
-  # Transform coordinates with rotation
-  rotated$x <- new.pos$x * cos(rotation[2]) +  new.pos$y * sin(rotation[2])
-  rotated$y <- -new.pos$x * sin(rotation[2]) + new.pos$y * cos(rotation[2])
+  # Rotate coordinate system
+  rotated$x <- new.pos$x * cos(coord.rot[2]) +  new.pos$y * sin(coord.rot[2])
+  rotated$y <- -new.pos$x * sin(coord.rot[2]) + new.pos$y * cos(coord.rot[2])
+  
+  # Apply looming if specified above
+  if (do.looming) {
+    # Looming stimuli are centred on the origin, as in the original rectangle
+    rotated$y <- rectangle$y
+    
+    # Apply looming
+    rotated <- rotated * looming.size[a]
+  }
   
   # Create Plot
   plot <- ggplot(rotated, aes(x=x, y=y)) + 
