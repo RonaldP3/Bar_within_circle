@@ -21,9 +21,6 @@ curr.dir <- getwd()
 # Get date/time string, to be used as folder name
 date.time <- format(Sys.time(), "%Y%m%d_%H%M")
 
-# Navigate one folder up to project root folder
-setwd("..")
-
 # Create main directory for sequences, if it does not exist already
 dir.create("Image_sequence",
            showWarnings = F)
