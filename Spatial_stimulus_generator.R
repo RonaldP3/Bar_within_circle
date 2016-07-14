@@ -12,9 +12,6 @@ library(ggplot2)
 #------------------------------------------------------------------------------
 # File and folder management
 
-### Set output file name ###
-file.out <- "Moving_bar"
-
 # Get current directory
 curr.dir <- getwd()
 
@@ -44,12 +41,17 @@ res <- 300
 ### Set aspect ratio
 asp.ratio <- c(4,3)
 
-### Set movement type ("move" or "stationary")
-move.type <- "move"
+### Set movement type ("move", "looming" or "stationary")
+move.type <- "stationary"
 
-### Apply looming? TRUE or FALSE. ###
-# Note: looming stimuli are set to "stationary" by default
-do.looming <- FALSE
+# Set output file name depending on movement type
+if (move.type == "move") {
+  file.out <- "Moving_bar"
+} else if (move.type == "looming") {
+  file.out <- "Looming_bar"
+} else {
+  file.out <- "Stationary_bar"
+}
 
 # Number of frames in sequence
 frames <- rate * duration
@@ -184,11 +186,14 @@ for (a in 1:frames) {
   } else if (move.type == "stationary") {
     # Stationary bar at lowest position
     new.pos$y <- new.pos$y + y[1]
+  } else if (move.type == "looming") {
+    # Looming stimulus is centred on origin
+    new.pos$y <- new.pos$y
   } else {
     stop("Select valid movement type")
   }
   
-  # Initiate rotated coordinate list
+  # Initiate rotated coordinate variable
   rotated <- new.pos
   
   # Rotate coordinate system
@@ -196,10 +201,7 @@ for (a in 1:frames) {
   rotated$y <- -new.pos$x * sin(coord.rot[2]) + new.pos$y * cos(coord.rot[2])
   
   # Apply looming if specified above
-  if (do.looming) {
-    # Looming stimuli are centred on the origin, as in the original rectangle
-    rotated$y <- rectangle$y
-    
+  if (move.type == "looming") {
     # Apply looming
     rotated <- rotated * looming.size[a]
   }
@@ -222,7 +224,7 @@ for (a in 1:frames) {
           text=element_blank())
   
   # Create file name for current frame
-  current.name <- paste(file.out, sprintf("%06.0f", a), ".png")
+  current.name <- paste0(file.out, sprintf("%06.0f", a), ".png")
   
   # Save current image
   ggsave(current.name,
