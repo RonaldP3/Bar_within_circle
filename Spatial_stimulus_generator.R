@@ -3,11 +3,57 @@
 
 # Author: Ronald Petie (ronald.petie@gmail.com)
 
+###############################################################################
+# Attach packages
+
 # Install ggplot
 # install.packages(ggplot2)
 
 # Attache package
 library(ggplot2)
+
+###############################################################################
+# User settings
+
+# Set frame rate in Hz
+rate <- 10
+# Set duration in seconds
+duration <- 5
+# Set resolution in dpi
+res <- 300
+# Set aspect ratio
+asp.ratio <- c(4,3)
+# width and height in pixels (must match aspect ratio)
+im.width <- 800
+im.height <- 600
+
+# Set movement type ("move", "looming" or "stationary")
+move.type <- "looming"
+
+# Set diameter and distance to eye in mm
+light.guide <- list(diameter = 4.5,
+                    distance = 1.0)
+
+# Set stimulus HEIGHT in degrees
+stim.height <- 20
+
+# Set relative WIDTH of stimulus between 0 and 1 
+# (1 = max width that fits witin circle). 
+rect.width <- 1
+
+# Set rotation of the coordinate system in degrees from 0 to 360. 
+# Default is a horizontal bar starting at the bottom moving up.
+coord.rot <- 0
+
+# Set looming. Sizes are relative and cannot be larger than 1.
+looming <- data.frame(start = 0.1,
+                      end = 1)
+
+# Set stimulus motion speed in degrees/second (when move type is "move")
+stim.speed <- 10
+
+###############################################################################
+# Initiate image parameters
 
 #------------------------------------------------------------------------------
 # File and folder management
@@ -32,18 +78,6 @@ setwd(date.time)
 #------------------------------------------------------------------------------
 # Image sequence main settings
 
-### Set frame rate in Hz ###
-rate <- 10
-### Set duration in seconds ###
-duration <- 5
-### Set resolution in dpi ###
-res <- 300
-### Set aspect ratio
-asp.ratio <- c(4,3)
-
-### Set movement type ("move", "looming" or "stationary")
-move.type <- "stationary"
-
 # Set output file name depending on movement type
 if (move.type == "move") {
   file.out <- "Moving_bar"
@@ -55,21 +89,17 @@ if (move.type == "move") {
 
 # Number of frames in sequence
 frames <- rate * duration
-# width and height in inches of output files
-im.width <- 800/res
-im.height <- 600/res
 
 # Check if aspect ratio matches resolution specified
 if(im.width/asp.ratio[1] != im.height/asp.ratio[2]) {
   stop("Resolution should match aspect ratio!")
 }
 
+# width and height of output files in inches
+im.width <- im.width/res
+im.height <- im.height/res
 #------------------------------------------------------------------------------
 # Light guide settings
-
-### Set diameter and distance to eye in mm
-light.guide <- list(diameter = 4.5,
-                    distance = 1.0)
 
 # Light guide diameter in degrees
 light.guide$diameter.degrees <- 
@@ -79,29 +109,17 @@ light.guide$diameter.degrees <-
 #------------------------------------------------------------------------------
 # Stimulus (polygon) shape and behaviour
 
-### Set stimulus height in degrees ###
-stim.height <- 20
-
-# Set dimensions of stimulus rectangle relative to screen. Note that the 
-# shortest side corresponds to the radius of the light guide.
-### Set to full available screen width ###
-rect.width <- 1    
 # Height relative to light guide diameter
 rect.height <- stim.height / light.guide$diameter.degrees
 
-### Set rotation of the coordinate system in degrees from 0 to 360. 
-# Default is a horizontal bar starting at the bottom moving up.
-coord.rot <- 0
 # In radians
 coord.rot[2] <- (coord.rot /360) * 2 * pi
-
-### Set looming. Sizes are relative and cannot be larger than 1.
-looming <- data.frame(start = 0.1,
-                      end = 1)
 
 # Check for wrong entries
 if (max(looming) > 1 | min(looming) < 0) {
   stop("Looming values must be between 0 and 1!")
+} else if (rect.width > 1 | rect.width < 0) {
+  stop("Values for rectangle width must be between 0 and 1")
 }
 
 # Generate sequence with relative size values based on looming settings
@@ -137,9 +155,6 @@ rectangle$y <- rectangle$y * (asp.ratio[2] / 2) * rect.height
 #------------------------------------------------------------------------------
 # Stimulus motion
 
-### Set stimulus motion speed in degrees/second ###
-stim.speed <- 10
-
 # Time for one period of wave. (Covers twice light guide radius!)
 period <- (2 * light.guide$diameter.degrees) / stim.speed
 
@@ -161,7 +176,7 @@ y <- y * min(asp.ratio)
 # Apply safety margin to prevent corners of rectangle from touching the circle
 y <- y * 0.98
 
-#------------------------------------------------------------------------------
+###############################################################################
 # Generate sequence
 
 # Variables needed for circle around origin
@@ -236,6 +251,9 @@ for (a in 1:frames) {
   # update progress bar
   setTxtProgressBar(pb, a)
 }
+
+###############################################################################
+# Finalise
 
 # Save workspace for future reference
 save.image(file = paste0(date.time, "_", file.out, ".RData"))
