@@ -34,6 +34,9 @@ move.type <- "looming"
 light.guide <- list(diameter = 4.5,
                     distance = 1.0)
 
+# Set colour of stimulus colour
+stimulus.colour <- "black"
+
 # Set stimulus HEIGHT in degrees
 stim.height <- 20
 
@@ -230,7 +233,7 @@ for (a in 1:frames) {
     ylim(-(asp.ratio[2] / 2), (asp.ratio[2] / 2)) +
     # Draw Circle of radius of shortest plot area
     geom_polygon(data = circle, aes(x, y),inherit.aes = F,
-                 fill = "white", colour =  "black") +
+                 fill = "white", colour =  stimulus.colour) +
     # Draw bar
     geom_polygon(fill = "black") +
     # Set empty theme
