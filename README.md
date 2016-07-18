@@ -12,6 +12,7 @@ Use this script for generating image sequences of a moving rectangle (or square)
  library(ggplot2)
  ```
 3. Set *User settings* in the script and run the script
-4. The script will generate a new folder called *Image_sequence* where each new sequence will be save in it's own folder.
+4. The script will generate a new folder called *Image_sequence* where each new sequence will be saved in it's own folder.
 5. This image sequence can be made into an AVI file by using, for instance, [ImageJ](http://imagej.nih.gov/).
+6. The entire workspace will be saved as an .RData file for future reference.
 
