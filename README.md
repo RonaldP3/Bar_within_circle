@@ -1,8 +1,8 @@
 # Bar_within_circle
-Generates translating or looming stimuli constained to a circular field of view
+Generates translating, stationary or looming stimuli constained to a circular field of view
 
 ## Description
-Use this script for generating image sequences of a moving rectangle (or square). The rectangle is confined within a circle, to optimise projecting the images into a circular, image carrying light guide.
+Use this script for generating image sequences of a moving rectangle (or square). The rectangle is confined within a circle, to facilitate projecting the images into a circular, image carrying light guide.
 
 ## Work flow
 1. Install R using the method specified for your platform. (Additionally, I can recommend using [RStudio](https://www.rstudio.com/))
